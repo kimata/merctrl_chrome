@@ -7,7 +7,8 @@ chrome.action.onClicked.addListener(function () {
         sender,
         send_response
       ) {
-        if (cmd["to"] !== "background") {
+          if (cmd["to"] !== "background") {
+          send_response();
           return false;
         }
         chrome.tabs.onRemoved.addListener(function (tabid, removed) {

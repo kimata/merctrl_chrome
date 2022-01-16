@@ -50,6 +50,10 @@ function worker_init() {
   });
 }
 
+function worker_destroy() {
+    tab_close('worker')
+}
+
 function tab_open_impl(type, url, active, callback) {
   chrome.tabs.create({ url: url, active: active }, function (tab) {
     tab_id_map[type] = tab.id;
@@ -75,6 +79,14 @@ function tab_open(type, url, active, callback) {
       }
     });
   }
+}
+
+function tab_close(type) {
+    if (tab_id_map[type] == null) {
+        return
+    }
+    chrome.tabs.remove(tab_id_map[type])
+    tab_id_map[type] = null
 }
 
 function hist_page_url(year, page) {

@@ -29,10 +29,19 @@ function sleep(sec) {
   return new Promise((resolve) => setTimeout(resolve, sec * 1000));
 }
 
+async function wait_for_xpath(xpath) {
+    // NOTE: DOM が構築されるのを待つ
+    for (var i = 0; i < 20; i++) {
+        if (typeof document.xpath(xpath)[0] === "undefined") {
+            await sleep(0.5);
+        }
+    }
+}
+
 async function complete_list_page_parse(send_response) {
   article_list = [];
 
-  await sleep(5); // NOTE: DOM が構築されるのを待つ
+  wait_for_xpath('//mer-tab-panel[@id="completed"]//mer-list-item')
 
   const article_count = document.xpath(
     '//mer-tab-panel[@id="completed"]//mer-list-item'
@@ -105,12 +114,7 @@ async function article_detail_page_parse(send_response) {
     },
   };
 
-  // NOTE: DOM が構築されるのを待つ
-  for (var i = 0; i < 10; i++) {
-    if (typeof document.xpath("//mer-item-object")[0] === "undefined") {
-      await sleep(1);
-    }
-  }
+  wait_for_xpath('//mer-item-object')
 
   article = {};
   for (node of document.xpath("//mer-item-object")[0].shadowRoot.childNodes) {
