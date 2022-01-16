@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>Merctrl Chrome</title>
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="stylesheet" href="bootstrap.min.css" />
+    <link rel="stylesheet" href="ctrl.css" />
+  </head>
+  <body>
+    <div class="jumbotron">
+      <div class="container">
+        <h1 class="display-3">Merctrl Chrome</h1>
+        <p class="lead">Mercari の出品管理を支援する Chrome 拡張</p>
+      </div>
+    </div>
+
+    <div class="container mb-3">
+      <ul class="nav nav-tabs" id="nav">
+        <li class="nav-item">
+          <a href="#" class="nav-link active" id="nav_onsale">出品中</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" id="nav_complete">売却済み</a>
+        </li>
+      </ul>
+    </div>
+
+    <div id="content_onsale"></div>
+
+    <div style="display: none" id="content_complete">
+      <div class="container">
+        <h2>履歴データ集計</h2>
+        <div class="container">
+          <p class="small">
+            Chrome
+            でメルカリにログインした状態でボタンを押すと出品中リストの集計が始まります．
+          </p>
+          <button id="start_complete" class="btn btn-primary">スタート</button>
+        </div>
+      </div>
+
+      <div class="container mt-5">
+        <h2>ステータス</h2>
+
+        <div class="row">
+          <div class="col-sm-12 col-lg-6">
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-12 col-lg-6">
+                  処理済:
+                  <span id="article_count_done_complete" class="display-6"
+                    >0</span
+                  >
+                  / <span id="article_count_total_complete">0</span>件
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-12 col-lg-12">
+                  <div class="progress" style="height: 20px">
+                    <div
+                      class="progress-bar"
+                      aria-valuenow="25"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      style="width: 0%"
+                      id="progress_bar_complete"
+                    >
+                      0%
+                    </div>
+                  </div>
+                  <div class="float-end">
+                    予想残り時間: <span id="remaining_time_complete">?</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-12 col-lg-6">
+            <div class="container">
+              <textarea
+                id="status_complete"
+                rows="4"
+                class="overflow-auto mt-3"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container mt-2">
+        <h2>一覧</h2>
+        <div class="container">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col" class="text-nowrap">#</th>
+                <th scope="col" class="text-nowrap">商品名</th>
+                <th scope="col" class="text-nowrap">商品代金</th>
+                <th scope="col" class="text-nowrap">販売手数料</th>
+                <th scope="col" class="text-nowrap">配送料</th>
+                <th scope="col" class="text-nowrap">販売利益</th>
+                <th scope="col" class="text-nowrap">送料</th>
+                <th scope="col" class="text-nowrap">購入日時</th>
+                <th scope="col" class="text-nowrap">商品ID</th>
+              </tr>
+            </thead>
+            <tbody id="table_complete">
+              <tr>
+                <td colspan="8">データがありません．</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="container mt-5 mb-5">
+      <h2>履歴データ保存</h2>
+      <div class="container">
+        <p class="small">
+          集計した履歴データを CSV
+          形式で保存します．集計途中やエラーが発生してもその時点までのデータを保存可能です．
+        </p>
+        <button id="save" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+
+    <footer class="text-center text-lg-start bg-light text-muted fixed-bottom">
+      <div
+        class="text-center p-1"
+        style="background-color: rgba(0, 0, 0, 0.05)"
+      >
+        Github:
+        <a
+          class="text-reset fw-bold"
+          href="https://github.com/kimata/amazhist_chrome"
+          >amazhist_chrome</a
+        >
+      </div>
+    </footer>
+
+    <script src="bootstrap.min.js"></script>
+    <script src="../loglevel.min.js"></script>
+    <script src="status.js"></script>
+    <script src="table_article.js"></script>
+    <script src="worker.js"></script>
+    <script src="ctrl.js"></script>
+  </body>
+</html>

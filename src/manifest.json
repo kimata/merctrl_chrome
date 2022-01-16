@@ -1,0 +1,32 @@
+{
+    "name": "Merhist Chrome Extension",
+    "short_name": "Merhist",
+    "version": "0.0.1",
+    "manifest_version": 3,
+    "description": "Mercari の販売履歴を収集する拡張",
+    "icons": {
+        "16": "icon/icon-16.png",
+		"32": "icon/icon-32.png",
+		"48": "icon/icon-48.png",
+		"128": "icon/icon-128.png"
+	},
+    "permissions": [
+        "background"
+    ],
+    "action": {
+        "default_icon": {
+            "32": "icon/icon-32.png"
+        }
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [{
+        "matches": ["https://jp.mercari.com/*"],
+        "js": [
+            "loglevel.min.js",
+            "content.js"
+        ]
+    }]
+}
+
