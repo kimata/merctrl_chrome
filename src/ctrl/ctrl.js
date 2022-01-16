@@ -142,6 +142,9 @@ document.getElementById('start_complete').onclick = function () {
     status_info('開始します．')
     state_init()
     worker_init().then(() => {
+        var mode = ctrl['mode']
+        create_article_table('table_' + mode, mode, article_list[mode])
+
         get_complete_list()
     })
 }
@@ -152,6 +155,9 @@ document.getElementById('start_onsale').onclick = function () {
     status_info('開始します．')
     state_init()
     worker_init().then(() => {
+        var mode = ctrl['mode']
+        create_article_table('table_' + mode, mode, article_list[mode])
+
         get_onsale_list()
     })
 }
