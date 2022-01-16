@@ -51,7 +51,7 @@ function worker_init() {
 }
 
 function worker_destroy() {
-    tab_close('worker')
+  tab_close("worker");
 }
 
 function tab_open_impl(type, url, active, callback) {
@@ -82,11 +82,11 @@ function tab_open(type, url, active, callback) {
 }
 
 function tab_close(type) {
-    if (tab_id_map[type] == null) {
-        return
-    }
-    chrome.tabs.remove(tab_id_map[type])
-    tab_id_map[type] = null
+  if (tab_id_map[type] == null) {
+    return;
+  }
+  chrome.tabs.remove(tab_id_map[type]);
+  tab_id_map[type] = null;
 }
 
 function hist_page_url(year, page) {
@@ -142,13 +142,13 @@ async function cmd_handle_parse(cmd, send_response) {
   cmd["to"] = "content";
 
   if (cmd["target"] === "complete_list") {
-    message = "注文履歴の件数を解析します．\n";
+    message = "売却履歴の件数を解析します．\n";
     url = "https://jp.mercari.com/mypage/listings/completed";
     post_exec = function (response) {
       status_info(response["list"].length + "件の取引が見つかりました．");
       send_response(response);
     };
-  } else if (cmd["target"] === "detail") {
+  } else if (cmd["target"] === "complete_detail") {
     message = "";
     url = cmd["url"];
     post_exec = function (response) {
@@ -157,6 +157,13 @@ async function cmd_handle_parse(cmd, send_response) {
       send_response(response);
     };
     await sleep(1);
+  } else if (cmd["target"] === "onsale_list") {
+    message = "出品数中の件数を解析します．\n";
+    url = "https://jp.mercari.com/mypage/listings";
+    post_exec = function (response) {
+      status_info(response["list"].length + "件の取引が見つかりました．");
+      send_response(response);
+    };
   } else {
     status_error("未知のコマンドです．\n");
     return;

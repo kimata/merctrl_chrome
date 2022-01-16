@@ -26,7 +26,144 @@
       </ul>
     </div>
 
-    <div id="content_onsale"></div>
+    <div id="content_onsale">
+      <div class="container mt-3">
+        <h2>出品リスト取得</h2>
+        <div class="container">
+          <p class="small">
+            Chrome
+            でメルカリにログインした状態でボタンを押すと出品中の商品の取得が始まります．
+          </p>
+          <button id="start_onsale" class="btn btn-primary">スタート</button>
+        </div>
+      </div>
+
+      <div class="container mt-4">
+        <h2>価格変更</h2>
+        <div class="container">
+          <p class="small">
+            チェックボックスが付いているアイテムの価格変更を行います．
+          </p>
+          <div class="row">
+            <div class="col-sm-12 col-lg-6">
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">値下げ幅</span>
+                </div>
+                <input
+                  type="text"
+                  class="form-control text-end"
+                  id="down_step"
+                  placeholder="値下げする価格幅を指定します"
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">円</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-12 col-lg-6">
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">下限価格</span>
+                </div>
+                <input
+                  type="text"
+                  class="form-control text-end"
+                  id="threshold"
+                  placeholder="値下げする下限価格を指定します"
+                />
+                <div class="input-group-append">
+                  <span class="input-group-text">円</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button id="start_pricedown" class="btn btn-primary w-auto mt-3">
+            スタート
+          </button>
+        </div>
+      </div>
+
+      <div class="container mt-5">
+        <h2>ステータス</h2>
+
+        <div class="row">
+          <div class="col-sm-12 col-lg-6">
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-12 col-lg-6">
+                  処理済:
+                  <span id="article_count_done_onsale" class="display-6"
+                    >0</span
+                  >
+                  / <span id="article_count_total_onsale">0</span>件
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-12 col-lg-12">
+                  <div class="progress" style="height: 20px">
+                    <div
+                      class="progress-bar"
+                      aria-valuenow="25"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      style="width: 0%"
+                      id="progress_bar_onsale"
+                    >
+                      0%
+                    </div>
+                  </div>
+                  <div class="float-end">
+                    予想残り時間: <span id="remaining_time_onsale">?</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-12 col-lg-6">
+            <div class="container">
+              <textarea
+                id="status_onsale"
+                rows="4"
+                class="overflow-auto mt-3"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container mt-2">
+        <h2>一覧</h2>
+        <div class="container">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col" class="text-nowrap">#</th>
+                <th scope="col" class="text-nowrap">
+                  <input
+                    type="checkbox"
+                    id="checkbox_all"
+                    class="form-check-input"
+                  />
+                </th>
+                <th scope="col" class="text-nowrap">商品名</th>
+                <th scope="col" class="text-nowrap">商品代金</th>
+                <th scope="col" class="text-nowrap">配送料</th>
+                <th scope="col" class="text-nowrap">送料負担</th>
+                <th scope="col" class="text-nowrap">非公開</th>
+                <th scope="col" class="text-nowrap">商品ID</th>
+              </tr>
+            </thead>
+            <tbody id="table_onsale">
+              <tr>
+                <td colspan="8">データがありません．</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <div style="display: none" id="content_complete">
       <div class="container">
@@ -34,7 +171,7 @@
         <div class="container">
           <p class="small">
             Chrome
-            でメルカリにログインした状態でボタンを押すと出品中リストの集計が始まります．
+            でメルカリにログインした状態でボタンを押すと売却済みの商品の集計が始まります．
           </p>
           <button id="start_complete" class="btn btn-primary">スタート</button>
         </div>
@@ -101,7 +238,7 @@
                 <th scope="col" class="text-nowrap">販売手数料</th>
                 <th scope="col" class="text-nowrap">配送料</th>
                 <th scope="col" class="text-nowrap">販売利益</th>
-                <th scope="col" class="text-nowrap">送料</th>
+                <th scope="col" class="text-nowrap">送料負担</th>
                 <th scope="col" class="text-nowrap">購入日時</th>
                 <th scope="col" class="text-nowrap">商品ID</th>
               </tr>

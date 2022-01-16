@@ -30,18 +30,19 @@ function sleep(sec) {
 }
 
 async function wait_for_xpath(xpath) {
-    // NOTE: DOM が構築されるのを待つ
-    for (var i = 0; i < 20; i++) {
-        if (typeof document.xpath(xpath)[0] === "undefined") {
-            await sleep(0.5);
-        }
+  // NOTE: DOM が構築されるのを待つ
+  for (var i = 0; i < 20; i++) {
+    if (typeof document.xpath(xpath)[0] === "undefined") {
+      await sleep(1);
     }
+    break;
+  }
 }
 
 async function complete_list_page_parse(send_response) {
   article_list = [];
 
-  wait_for_xpath('//mer-tab-panel[@id="completed"]//mer-list-item')
+  await wait_for_xpath('//mer-tab-panel[@id="completed"]//mer-list-item');
 
   const article_count = document.xpath(
     '//mer-tab-panel[@id="completed"]//mer-list-item'
@@ -61,34 +62,34 @@ async function complete_list_page_parse(send_response) {
   });
 }
 
-async function article_detail_page_parse(send_response) {
+async function complete_detail_page_parse(send_response) {
   heading_map = {
     商品代金: {
       name: "price",
       xpath: "//mer-price",
       value: function (elem) {
-        return parseInt(elem.getAttribute("value").trim());
+        return parseInt(elem.getAttribute("value").trim(), 10);
       },
     },
     販売手数料: {
       name: "sales_commission",
       xpath: "//mer-price",
       value: function (elem) {
-        return parseInt(elem.getAttribute("value").trim());
+        return parseInt(elem.getAttribute("value").trim(), 10);
       },
     },
     配送料: {
       name: "delivery_charge",
       xpath: "//mer-price",
       value: function (elem) {
-        return parseInt(elem.getAttribute("value").trim());
+        return parseInt(elem.getAttribute("value").trim(), 10);
       },
     },
     販売利益: {
       name: "profit",
       xpath: "//mer-price",
       value: function (elem) {
-        return parseInt(elem.getAttribute("value").trim());
+        return parseInt(elem.getAttribute("value").trim(), 10);
       },
     },
     送料: {
@@ -114,7 +115,7 @@ async function article_detail_page_parse(send_response) {
     },
   };
 
-  wait_for_xpath('//mer-item-object')
+  await wait_for_xpath("//mer-item-object");
 
   article = {};
   for (node of document.xpath("//mer-item-object")[0].shadowRoot.childNodes) {
@@ -148,79 +149,64 @@ async function article_detail_page_parse(send_response) {
   });
 }
 
-function order_count_page_parse() {
-  const order_count_text = document
-    .xpath(
-      '//label[@for="orderFilter"]//span[contains(@class, "num-orders")]'
-    )[0]
-    .innerText.trim();
+function parse_onsale_article(index) {
+  const parent_xpath =
+    '//mer-list[@data-testid="listed-item-list"]/mer-list-item[' +
+    (index + 1) +
+    "]";
 
-  const order_count = parseInt(order_count_text.replace("件", ""));
+  const article_root = document.xpath(parent_xpath + "//mer-item-object")[0]
+    .shadowRoot;
 
-  return {
-    count: order_count,
-  };
-}
-
-function order_list_page_parse() {
-  const order_count = document.xpath(
-    'count(//div[contains(@class, " order ")])'
+  const article_url = document.xpath(parent_xpath + "//a")[0].href;
+  const article_id = article_url.split("/").slice(-1)[0];
+  const article_title = article_root
+    .querySelector("div.container")
+    .getAttribute("aria-label");
+  const article_price = parseInt(
+    article_root.querySelector("mer-price").getAttribute("value"),
+    10
   );
-  log.info({ order_count: order_count });
 
-  detail_page_list = [];
-  for (var i = 0; i < order_count; i++) {
-    const parent_xpath = '//div[contains(@class, " order ")][' + (i + 1) + "]";
-    const date = document
-      .xpath(
-        parent_xpath +
-          '//div[contains(@class, "order-info")] // span[contains(@class, "value")]'
-      )[0]
-      .innerText.trim();
-    const url = document.xpath(
-      parent_xpath + '//a[contains(text(), "注文内容を表示")]'
-    )[0].href;
-
-    detail_page_list.push({
-      date: date.replace("年", "/").replace("月", "/").replace("日", ""), // 雑だけど動く
-      url: url,
-    });
+  var article_is_stop = 0;
+  if (article_root.querySelector("div.content > mer-text") != null) {
+    article_is_stop = 1;
   }
-  const is_last =
-    document.xpath(
-      'count(//ul[contains(@class, "a-pagination")]/li[contains(@class, "a-last")]/a)'
-    ) == 0;
+
+  var article_view = 0;
+  try {
+    article_view = article_root.querySelector(
+      "mer-icon-eye-outline + span.icon-text"
+    ).textContent;
+  } catch (e) {}
 
   return {
-    list: detail_page_list,
-    is_last: is_last,
+    id: article_id,
+    title: article_title,
+    price: article_price,
+    view: article_view,
+    is_stop: article_is_stop,
+    url: article_url,
   };
 }
 
-function order_detail_page_parse() {
-  try {
-    if (
-      document.xpath('count(//div[contains(@class, "a-box shipment")])') != 0
-    ) {
-      return order_detail_page_parse_normal();
-    } else {
-      return order_detail_page_parse_digital();
-    }
-  } catch (e) {
-    print_stacktrace(e);
+async function onsale_list_page_parse(send_response) {
+  var article_list = [];
 
-    var amazon_msg = "";
-    try {
-      amazon_msg = document
-        .xpath('//h4[contains(@class, "a-alert-heading")]')[0]
-        .innerText.trim();
-    } catch (e) {}
-    if (amazon_msg != "") {
-      return "[amazon]" + amazon_msg;
-    } else {
-      return e.message;
-    }
+  await wait_for_xpath(
+    '//mer-list[@data-testid="listed-item-list"]/mer-list-item'
+  );
+
+  const article_count = document.xpath(
+    '//mer-list[@data-testid="listed-item-list"]/mer-list-item'
+  ).length;
+  for (var i = 0; i < article_count; i++) {
+    article_list.push(parse_onsale_article(i));
   }
+
+  send_response({
+    list: article_list,
+  });
 }
 
 function cmd_handler(cmd, sender, send_response) {
@@ -231,12 +217,10 @@ function cmd_handler(cmd, sender, send_response) {
   if (cmd["type"] === "parse") {
     if (cmd["target"] === "complete_list") {
       complete_list_page_parse(send_response);
-    } else if (cmd["target"] === "detail") {
-      article_detail_page_parse(send_response);
-      // } else if (cmd['target'] === 'order_count') {
-      //     send_response(order_count_page_parse())
-      // } else if (cmd['target'] === 'list') {
-      //     send_response(order_list_page_parse())
+    } else if (cmd["target"] === "complete_detail") {
+      complete_detail_page_parse(send_response);
+    } else if (cmd["target"] === "onsale_list") {
+      onsale_list_page_parse(send_response);
     } else {
       log.error({
         msg: "Unknown cmd target",

@@ -20,6 +20,7 @@ function status_clear() {
 }
 
 function notify_progress() {
+  var mode = ctrl["mode"];
   var count_done = article_info[mode]["count_done"];
   var count_total = article_info[mode]["count_total"];
   document.getElementById("article_count_done_" + ctrl["mode"]).innerText =

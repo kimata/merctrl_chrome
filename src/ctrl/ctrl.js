@@ -1,5 +1,5 @@
-const mode_list = ["onsale", "complete"]
-var start_time = {}
+const mode_list = ["onsale", "complete"];
+var start_time = {};
 var article_info = {};
 var article_list = {};
 var ctrl = {
@@ -7,15 +7,15 @@ var ctrl = {
 };
 
 function state_init() {
-    mode = ctrl["mode"]
-    start_time[mode] = new Date();
-    article_list[mode] = []
-    article_info[mode] = {
-        count_total: 0,
-        count_done: 0,
-    }
-    status_clear();
-    notify_progress();
+  mode = ctrl["mode"];
+  start_time[mode] = new Date();
+  article_list[mode] = [];
+  article_info[mode] = {
+    count_total: 0,
+    count_done: 0,
+  };
+  status_clear();
+  notify_progress();
 }
 
 // 実行順序を保ちながら非同期でリストに対して処理を実行
@@ -41,7 +41,7 @@ function get_article_detail(article, index, mode, callback) {
     {
       to: "background",
       type: "parse",
-      target: "detail",
+      target: "complete_detail",
       index: index,
       url: article["url"],
     },
@@ -53,7 +53,7 @@ function get_article_detail(article, index, mode, callback) {
       response["article"]["detail"] = true;
 
       article_list[mode][parseInt(index, 10)] = response["article"];
-      create_article_table("table_" + mode, article_list[mode]);
+      create_article_table("table_" + mode, mode, article_list[mode]);
 
       article_info[mode]["count_done"] += 1;
 
@@ -95,33 +95,64 @@ function get_complete_list() {
       });
     })
     .then(() => {
-        status_info("完了しました．");
-        worker_destroy()
-        button_state_update(true)
+      status_info("完了しました．");
+      worker_destroy();
+      button_state_update(true);
     });
 }
 
+function get_onsale_list() {
+  new Promise((resolve) => {
+    cmd_handle(
+      {
+        to: "background",
+        type: "parse",
+        target: "onsale_list",
+      },
+      function (response) {
+        article_list["onsale"] = response["list"];
+        console.log(response["list"]);
+        var mode = "onsale";
+        create_article_table("table_" + mode, mode, article_list[mode]);
+        resolve();
+      }
+    );
+  }).then(() => {
+    status_info("完了しました．");
+  });
+}
+
 function button_state_update(done) {
-    for (mode of ['complete', 'onsale']) {
-        if (done) {
-            document.getElementById('start_' + mode).disabled = false
-        } else {
-            document.getElementById('start_' + mode).disabled = true
-        }
+  for (mode of ["complete", "onsale"]) {
+    if (done) {
+      document.getElementById("start_" + mode).disabled = false;
+    } else {
+      document.getElementById("start_" + mode).disabled = true;
     }
+  }
 }
 
 document.getElementById("save").onclick = function () {
-    export_csv(article_list[ctrl["mode"]]);
+  export_csv(article_list[ctrl["mode"]]);
 };
 
 document.getElementById("start_complete").onclick = function () {
-    button_state_update(false)
+  button_state_update(false);
 
   status_info("開始します．");
   state_init();
   worker_init().then(() => {
-          get_complete_list();
+    get_complete_list();
+  });
+};
+
+document.getElementById("start_onsale").onclick = function () {
+  button_state_update(false);
+
+  status_info("開始します．");
+  state_init();
+  worker_init().then(() => {
+    get_onsale_list();
   });
 };
 
@@ -138,8 +169,7 @@ for (mode of mode_list) {
       document.getElementById("content_" + ctrl["mode"]).style.display = "none";
       document.getElementById("content_" + mode).style.display = "block";
 
-        ctrl["mode"] = mode;
+      ctrl["mode"] = mode;
     };
   })(mode);
 }
-
