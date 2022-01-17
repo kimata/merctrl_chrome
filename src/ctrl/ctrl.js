@@ -101,6 +101,42 @@ function get_complete_list() {
         })
 }
 
+function update_pricedown_button(event) {
+    if (event.target.id == 'checkbox_all') {
+        for (var item of document.getElementsByClassName('form-check-input')) {
+            if (item.disabled) {
+                continue
+            }
+            item.checked = event.target.checked
+        }
+    }
+
+    if (
+        parseInt(document.getElementById('down_step').value, 10) == 0 ||
+        parseInt(document.getElementById('threshold').value, 10) == 0
+    ) {
+        document.getElementById('start_pricedown').disabled = true
+        return
+    }
+
+    var checked = false
+    for (var item of document.getElementsByClassName('form-check-input')) {
+        if (item.checked) {
+            checked = true
+            break
+        }
+    }
+    document.getElementById('start_pricedown').disabled = !checked
+}
+
+function checkbox_callback() {
+    for (var checkbox of document.getElementsByClassName('form-check-input')) {
+        checkbox.onchange = update_pricedown_button
+    }
+    document.getElementById('down_step').onchange = update_pricedown_button
+    document.getElementById('threshold').onchange = update_pricedown_button
+}
+
 function get_onsale_list() {
     new Promise((resolve) => {
         cmd_handle(
@@ -113,12 +149,58 @@ function get_onsale_list() {
                 article_list['onsale'] = response['list']
                 console.log(response['list'])
                 var mode = 'onsale'
-                create_article_table('table_' + mode, mode, article_list[mode])
+                create_article_table('table_' + mode, mode, article_list[mode], checkbox_callback)
                 resolve()
             }
         )
     }).then(() => {
         status_info('完了しました．')
+        worker_destroy()
+        button_state_update(true)
+    })
+}
+
+function do_article_pricedown(article, index, callback) {
+    cmd_handle(
+        {
+            to: 'background',
+            type: 'parse',
+            target: 'pricedown_input',
+            index: index,
+            url: 'https://jp.mercari.com/sell/edit/' + article['id']
+        },
+        function (response) {
+            console.log(response)
+            // if (typeof response === 'undefined') {
+            //     return callback()
+            // }
+            // response['article']['url'] = article['url']
+            // response['article']['detail'] = true
+
+            // article_list[mode][parseInt(index, 10)] = response['article']
+            // create_article_table('table_' + mode, mode, article_list[mode])
+
+            // article_info[mode]['count_done'] += 1
+
+            // notify_progress()
+            callback()
+        }
+    )
+}
+
+function do_list_pricedown() {
+    new Promise((resolve) => {
+        async_loop(
+            list,
+            0,
+            function (article, index, callback) {
+                do_pricedown(article, index, callback)
+            },
+            resolve
+        )
+    }).then(() => {
+        status_info('完了しました．')
+        worker_destroy()
     })
 }
 
@@ -132,6 +214,12 @@ function button_state_update(done) {
     }
 }
 
+function article_list_update() {
+    for (var article of article_list['onsale']) {
+        article['target'] = document.getElementById('checkbox_' + article['id']).checked
+    }
+}
+
 document.getElementById('save').onclick = function () {
     export_csv(article_list[ctrl['mode']])
 }
@@ -139,8 +227,9 @@ document.getElementById('save').onclick = function () {
 document.getElementById('start_complete').onclick = function () {
     button_state_update(false)
 
-    status_info('開始します．')
     state_init()
+    status_info('開始します．')
+
     worker_init().then(() => {
         var mode = ctrl['mode']
         create_article_table('table_' + mode, mode, article_list[mode])
@@ -152,13 +241,27 @@ document.getElementById('start_complete').onclick = function () {
 document.getElementById('start_onsale').onclick = function () {
     button_state_update(false)
 
-    status_info('開始します．')
     state_init()
+    status_info('開始します．')
+
     worker_init().then(() => {
         var mode = ctrl['mode']
         create_article_table('table_' + mode, mode, article_list[mode])
 
         get_onsale_list()
+    })
+}
+
+document.getElementById('start_pricedown').onclick = function () {
+    ctrl['mode'] = 'onsale'
+
+    status_clear()
+    status_info('開始します．')
+
+    article_list_update()
+
+    worker_init().then(() => {
+        do_list_pricedown()
     })
 }
 

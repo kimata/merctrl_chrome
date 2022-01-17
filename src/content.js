@@ -184,6 +184,21 @@ async function onsale_list_page_parse(send_response) {
     })
 }
 
+async function pricedown_input(send_response) {
+    var article = {}
+
+    // await wait_for_xpath('//mer-list[@data-testid="listed-item-list"]/mer-list-item')
+
+    // const article_count = document.xpath('//mer-list[@data-testid="listed-item-list"]/mer-list-item').length
+    // for (var i = 0; i < article_count; i++) {
+    //     article_list.push(parse_onsale_article(i))
+    // }
+
+    send_response({
+        article: article
+    })
+}
+
 function cmd_handler(cmd, sender, send_response) {
     if (cmd['to'] !== 'content') {
         return false
@@ -196,6 +211,8 @@ function cmd_handler(cmd, sender, send_response) {
             complete_detail_page_parse(send_response)
         } else if (cmd['target'] === 'onsale_list') {
             onsale_list_page_parse(send_response)
+        } else if (cmd['target'] === 'pricedown_input') {
+            pricedown_input(send_response)
         } else {
             log.error({
                 msg: 'Unknown cmd target',

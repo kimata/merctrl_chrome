@@ -1,4 +1,4 @@
-function create_article_table(id, mode, article_list) {
+function create_article_table(id, mode, article_list, callback = () => {}) {
     var item_list
     if (mode == 'onsale') {
         item_list = [
@@ -7,7 +7,9 @@ function create_article_table(id, mode, article_list) {
             { name: 'price', type: 'price' },
             { name: 'delivery_charge', type: 'price' },
             { name: 'postage', type: 'text' },
+            { name: 'method', type: 'text' },
             { name: 'is_stop', type: 'flag' },
+            { name: 'is_pricedown', type: 'flag' },
             { name: 'id', type: 'id' }
         ]
     } else {
@@ -77,6 +79,14 @@ function create_article_table(id, mode, article_list) {
                 } else {
                     col.textContent = ''
                 }
+                if (item['name'] == 'is_pricedown') {
+                    col.setAttribute('class', 'text-success')
+                }
+            } else if (item['type'] == 'text') {
+                text = article[item['name']]
+                if (typeof text !== 'undefined') {
+                    col.textContent = text
+                }
             } else {
                 col.textContent = article[item['name']]
             }
@@ -84,4 +94,5 @@ function create_article_table(id, mode, article_list) {
         }
         table.appendChild(row)
     }
+    callback()
 }

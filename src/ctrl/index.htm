@@ -48,8 +48,10 @@
                                     <span class="input-group-text">値下げ幅</span>
                                 </div>
                                 <input
-                                    type="text"
+                                    type="number"
                                     class="form-control text-end"
+                                    value="100"
+                                    step="100"
                                     id="down_step"
                                     placeholder="値下げする価格幅を指定します"
                                 />
@@ -64,8 +66,10 @@
                                     <span class="input-group-text">下限価格</span>
                                 </div>
                                 <input
-                                    type="text"
+                                    type="number"
                                     class="form-control text-end"
+                                    value="25000"
+                                    step="500"
                                     id="threshold"
                                     placeholder="値下げする下限価格を指定します"
                                 />
@@ -75,7 +79,7 @@
                             </div>
                         </div>
                     </div>
-                    <button id="start_pricedown" class="btn btn-primary w-auto mt-3">処理開始</button>
+                    <button id="start_pricedown" class="btn btn-primary w-auto mt-3" disabled>処理開始</button>
                 </div>
             </div>
 
@@ -134,7 +138,9 @@
                                 <th scope="col" class="text-nowrap">商品代金</th>
                                 <th scope="col" class="text-nowrap">配送料</th>
                                 <th scope="col" class="text-nowrap">送料負担</th>
+                                <th scope="col" class="text-nowrap">配送方法</th>
                                 <th scope="col" class="text-nowrap">非公開</th>
+                                <th scope="col" class="text-nowrap">値下げ処理</th>
                                 <th scope="col" class="text-nowrap">商品ID</th>
                             </tr>
                         </thead>
@@ -153,7 +159,7 @@
                 <h2>売却済みデータ</h2>
                 <div class="container">
                     <p class="small">
-                        Chrome でメルカリにログインした状態でボタンを押すと売却済みの商品の集計が始まります．
+                        Chrome でメルカリにログインした状態でボタンを押すと売却済みの商品の取得が始まります．
                     </p>
                     <button id="start_complete" class="btn btn-primary">収集開始</button>
                 </div>
