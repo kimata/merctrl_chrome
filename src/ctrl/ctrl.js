@@ -72,8 +72,6 @@ function get_complete_list() {
                 target: 'complete_list'
             },
             function (response) {
-                response['list'] = response['list'].splice(0, 3)
-
                 article_list['complete'] = response['list']
                 article_info['complete']['count_total'] = response['list'].length
 
@@ -147,7 +145,6 @@ function get_onsale_list() {
             },
             function (response) {
                 article_list['onsale'] = response['list']
-                console.log(response['list'])
                 var mode = 'onsale'
                 create_article_table('table_' + mode, mode, article_list[mode], checkbox_callback)
                 resolve()
