@@ -149,10 +149,7 @@ function parse_onsale_article(index) {
     const article_title = article_root.querySelector('div.container').getAttribute('aria-label')
     const article_price = parseInt(article_root.querySelector('mer-price').getAttribute('value'), 10)
 
-    var article_is_stop = 0
-    if (article_root.querySelector('div.content > mer-text') != null) {
-        article_is_stop = 1
-    }
+    var article_is_stop = article_root.querySelector('div.content > mer-text') != null
 
     var article_view = 0
     try {
@@ -184,15 +181,70 @@ async function onsale_list_page_parse(send_response) {
     })
 }
 
-async function pricedown_input(send_response) {
+function selecte_value(name) {
+    var index = document.getElementsByName(name)[1].selectedIndex
+
+    return document.getElementsByName(name)[1].options[index].text
+}
+
+async function pricedown_input(cmd, send_response) {
     var article = {}
 
-    // await wait_for_xpath('//mer-list[@data-testid="listed-item-list"]/mer-list-item')
+    await wait_for_xpath('//mer-text-input[@name="price"]')
 
-    // const article_count = document.xpath('//mer-list[@data-testid="listed-item-list"]/mer-list-item').length
-    // for (var i = 0; i < article_count; i++) {
-    //     article_list.push(parse_onsale_article(i))
-    // }
+    article['method'] = selecte_value('shippingMethod')
+    article['payer'] = selecte_value('shippingPayer')
+    article['price_before'] = parseInt(
+        document.xpath('//mer-text-input[@name="price"]')[0].getAttribute('value').trim(),
+        10
+    )
+    if (article['method'] == '梱包・発送たのメル便') {
+        article['shipping_fee'] = parseInt(
+            document.xpath('//mer-price[@data-testid="shipping-fee"]')[0].getAttribute('value').trim(),
+            10
+        )
+        article['price_total_before'] = parseInt(
+            document.xpath('//mer-price[@data-testid="price-including-shipping"]')[0].getAttribute('value').trim(),
+            10
+        )
+
+        if (article['price_before'] + article['shipping_fee'] != article['price_total_before']) {
+            const msg_error = '取得したデータに不整合があります．'
+            log.error(msg_error)
+            send_response({
+                article: article,
+                error: msg_error
+            })
+            return
+        }
+    } else {
+        article['price_total_before'] = article['price_before']
+    }
+
+    if (article['price_before'] < cmd['threshold']) {
+        const msg_error = '現在価格が閾値以下なのでスキップします．'
+        log.error(msg_error)
+        send_response({
+            article: article,
+            error: msg_error
+        })
+        return
+    }
+
+    article['price_after'] = article['price_before'] - cmd['down_step']
+    article['price_total_after'] = article['price_total_before'] - cmd['down_step']
+
+    var price_input = document.xpath('//input[@name="price"]')[0]
+
+    // NOTE: 普通に value を上書きするだけだと，イベントが発動せずに意図通りの挙動にならない
+    price_input.value = ''
+    price_input.focus()
+    document.execCommand('insertText', false, article['price_after'])
+
+    document.xpath('//button[@data-testid="edit-button"]')[0].click()
+
+    // NOTE: submit 完了待ちと，リクエスト間隔を開けるのを兼ねてちょっと長めに待つ
+    await sleep(1)
 
     send_response({
         article: article
@@ -212,7 +264,7 @@ function cmd_handler(cmd, sender, send_response) {
         } else if (cmd['target'] === 'onsale_list') {
             onsale_list_page_parse(send_response)
         } else if (cmd['target'] === 'pricedown_input') {
-            pricedown_input(send_response)
+            pricedown_input(cmd, send_response)
         } else {
             log.error({
                 msg: 'Unknown cmd target',

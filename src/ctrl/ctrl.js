@@ -10,11 +10,18 @@ function state_init() {
     mode = ctrl['mode']
     start_time[mode] = new Date()
     article_list[mode] = []
+    status_clear()
+    progress_init()
+    notify_progress()
+}
+
+function progress_init() {
+    mode = ctrl['mode']
+
     article_info[mode] = {
         count_total: 0,
         count_done: 0
     }
-    status_clear()
     notify_progress()
 }
 
@@ -125,6 +132,8 @@ function update_pricedown_button(event) {
         }
     }
     document.getElementById('start_pricedown').disabled = !checked
+
+    article_list_check_update()
 }
 
 function checkbox_callback() {
@@ -157,41 +166,78 @@ function get_onsale_list() {
     })
 }
 
-function do_article_pricedown(article, index, callback) {
+function do_article_pricedown(article, index, setting, callback) {
+    log.trace(article)
+
+    if (!article['target']) {
+        status_info(index + 1 + '件目は対象外なのでスキップしました．')
+        article_info['onsale']['count_done'] += 1
+        notify_progress()
+        callback()
+        return
+    }
+
     cmd_handle(
         {
             to: 'background',
             type: 'parse',
             target: 'pricedown_input',
             index: index,
-            url: 'https://jp.mercari.com/sell/edit/' + article['id']
+            url: 'https://jp.mercari.com/sell/edit/' + article['id'],
+            down_step: setting['down_step'],
+            threshold: setting['threshold']
         },
         function (response) {
-            console.log(response)
-            // if (typeof response === 'undefined') {
-            //     return callback()
-            // }
-            // response['article']['url'] = article['url']
-            // response['article']['detail'] = true
+            if (typeof response === 'undefined') {
+                article_info['onsale']['count_done'] += 1
+                notify_progress()
+                return callback()
+            }
+            Object.assign(article, response['article'])
 
-            // article_list[mode][parseInt(index, 10)] = response['article']
-            // create_article_table('table_' + mode, mode, article_list[mode])
+            delete article['error']
+            if ('error' in response) {
+                article['error'] = response['error']
+                delete article['price_after']
+                delete article['price_total_after']
+            } else {
+                article['price'] = article['price_total_after']
+            }
+            article['done'] = true
 
-            // article_info[mode]['count_done'] += 1
+            create_article_table('table_' + mode, mode, article_list[mode])
 
-            // notify_progress()
+            article_info['onsale']['count_done'] += 1
+            notify_progress()
             callback()
         }
     )
 }
 
 function do_list_pricedown() {
+    var down_step = parseInt(document.getElementById('down_step').value, 10)
+    var threshold = parseInt(document.getElementById('threshold').value, 10)
+
+    progress_init()
+    article_info['onsale']['count_total'] = article_list['onsale'].length
+
+    article_list_done_clear()
+    create_article_table('table_' + mode, mode, article_list[mode])
+
     new Promise((resolve) => {
         async_loop(
-            list,
+            article_list['onsale'],
             0,
             function (article, index, callback) {
-                do_pricedown(article, index, callback)
+                do_article_pricedown(
+                    article,
+                    index,
+                    {
+                        down_step: down_step,
+                        threshold: threshold
+                    },
+                    callback
+                )
             },
             resolve
         )
@@ -211,7 +257,14 @@ function button_state_update(done) {
     }
 }
 
-function article_list_update() {
+function article_list_done_clear() {
+    for (var article of article_list['onsale']) {
+        delete article['done']
+        delete article['error']
+    }
+}
+
+function article_list_check_update() {
     for (var article of article_list['onsale']) {
         article['target'] = document.getElementById('checkbox_' + article['id']).checked
     }
@@ -254,8 +307,6 @@ document.getElementById('start_pricedown').onclick = function () {
 
     status_clear()
     status_info('開始します．')
-
-    article_list_update()
 
     worker_init().then(() => {
         do_list_pricedown()

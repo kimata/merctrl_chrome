@@ -1,3 +1,4 @@
+// FIXME: スパゲッティ！
 function create_article_table(id, mode, article_list, callback = () => {}) {
     var item_list
     if (mode == 'onsale') {
@@ -6,10 +7,10 @@ function create_article_table(id, mode, article_list, callback = () => {}) {
             { name: 'title', type: 'title' },
             { name: 'price', type: 'price' },
             { name: 'delivery_charge', type: 'price' },
-            { name: 'postage', type: 'text' },
+            { name: 'payer', type: 'text' },
             { name: 'method', type: 'text' },
             { name: 'is_stop', type: 'flag' },
-            { name: 'is_pricedown', type: 'flag' },
+            { name: 'done', type: 'done' },
             { name: 'id', type: 'id' }
         ]
     } else {
@@ -53,7 +54,15 @@ function create_article_table(id, mode, article_list, callback = () => {}) {
                 if (typeof price === 'undefined') {
                     col.textContent = '-'
                 } else {
-                    col.textContent = price.toLocaleString() + '円'
+                    if ('price_total_after' in article) {
+                        col.textContent =
+                            article['price_total_before'].toLocaleString() +
+                            ' →  ' +
+                            article['price_total_after'].toLocaleString() +
+                            '円'
+                    } else {
+                        col.textContent = price.toLocaleString() + '円'
+                    }
                 }
                 col.setAttribute('class', 'text-end text-nowrap')
             } else if (item['type'] == 'date') {
@@ -69,18 +78,27 @@ function create_article_table(id, mode, article_list, callback = () => {}) {
                 checkbox.setAttribute('type', 'checkbox')
                 checkbox.setAttribute('id', 'checkbox_' + article['id'])
                 checkbox.setAttribute('class', 'form-check-input')
-                if (article['is_stop'] == 1) {
+                checkbox.checked = article[item['name']]
+
+                if (article['is_stop']) {
                     checkbox.setAttribute('disabled', 'disabled')
                 }
                 col.appendChild(checkbox)
             } else if (item['type'] == 'flag') {
-                if (article[item['name']] == 1) {
-                    col.textContent = '✔️'
+                if (article[item['name']]) {
+                    col.textContent = '️\u2714'
                 } else {
                     col.textContent = ''
                 }
-                if (item['name'] == 'is_pricedown') {
-                    col.setAttribute('class', 'text-success')
+            } else if (item['type'] == 'done') {
+                if ('error' in article) {
+                    col.setAttribute('class', 'text-danger')
+                    col.textContent = article['error']
+                } else if (article[item['name']]) {
+                    var badge = document.createElement('span')
+                    badge.setAttribute('class', 'badge bg-success')
+                    badge.textContent = '️完了'
+                    col.appendChild(badge)
                 }
             } else if (item['type'] == 'text') {
                 text = article[item['name']]

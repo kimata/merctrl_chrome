@@ -134,14 +134,14 @@ async function cmd_handle_parse(cmd, send_response) {
         message = '売却履歴の件数を解析します．\n'
         url = 'https://jp.mercari.com/mypage/listings/completed'
         post_exec = function (response) {
-            status_info(response['list'].length + '件の取引が見つかりました．')
+            status_info(response['list'].length + '件の履歴が見つかりました．')
             send_response(response)
         }
     } else if (cmd['target'] === 'complete_detail') {
         message = ''
         url = cmd['url']
         post_exec = function (response) {
-            status_info(cmd['index'] + 1 + '件目の取引を解析しました．')
+            status_info(cmd['index'] + 1 + '件目の履歴を解析しました．')
             console.log(response)
             send_response(response)
         }
@@ -150,9 +150,21 @@ async function cmd_handle_parse(cmd, send_response) {
         message = '出品数中の件数を解析します．\n'
         url = 'https://jp.mercari.com/mypage/listings'
         post_exec = function (response) {
-            status_info(response['list'].length + '件の取引が見つかりました．')
+            status_info(response['list'].length + '件の出品が見つかりました．')
             send_response(response)
         }
+    } else if (cmd['target'] === 'pricedown_input') {
+        message = ''
+        url = cmd['url']
+        post_exec = function (response) {
+            if ('error' in response) {
+                status_info(cmd['index'] + 1 + '件目の処理をスキップしました．(' + response['error'] + ')')
+            } else {
+                status_info(cmd['index'] + 1 + '件目の出品を処理しました．')
+            }
+            send_response(response)
+        }
+        await sleep(1)
     } else {
         status_error('未知のコマンドです．\n')
         return
