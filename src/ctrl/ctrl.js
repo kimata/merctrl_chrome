@@ -271,7 +271,7 @@ function article_list_check_update() {
 }
 
 document.getElementById('save').onclick = function () {
-    export_csv(article_list[ctrl['mode']])
+    export_csv(ctrl['mode'])
 }
 
 document.getElementById('start_complete').onclick = function () {
