@@ -10,6 +10,14 @@ merctrl_chrome は，メルカリの出品情報を管理する Chrome 拡張で
 
 ## インストール
 
+2通りのインストール方法があります．Chrome ウェブストアからのインストールがお手軽です．
+
+### Chrome ウェブストアから
+
+下記のページの「Chromeに追加」ボタンをクリックするとインストールできます．
+
+[Merctrl Chrome Extension](https://chrome.google.com/webstore/detail/merhist-chrome-extension/peopdcjikckcplhdipjgfiefcggolbji?hl=ja)
+
 ### Github から
 
 1. Github からソース一式をダウンロード．
@@ -26,4 +34,4 @@ merctrl_chrome は，メルカリの出品情報を管理する Chrome 拡張で
 
 ## TODO
 
-- Chrome ウェブストアへの登録
+特になし．
