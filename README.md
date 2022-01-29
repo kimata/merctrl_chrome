@@ -6,6 +6,8 @@ merctrl_chrome は，メルカリの出品情報を管理する Chrome 拡張で
 - 出品しているアイテム一覧の CSV 保存
 - 売却済みのアイテムの CSV 保存
 
+![スクリーンショット](img/screenshot.png)
+
 ## インストール
 
 ### Github から
