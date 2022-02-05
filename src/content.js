@@ -176,7 +176,7 @@ async function onsale_list_page_parse(send_response) {
         if (document.xpath(button_xpath).length == 0) {
             break
         }
-        document.xpath()[0].click()
+        document.xpath(button_xpath)[0].click()
         await sleep(2)
     }
 
