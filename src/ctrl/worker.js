@@ -78,14 +78,6 @@ function tab_close(type) {
     tab_id_map[type] = null
 }
 
-function hist_page_url(year, page) {
-    return (
-        'https://www.amazon.co.jp/gp/your-account/order-history/?orderFilter=year-' +
-        year +
-        '&startIndex=' +
-        (page - 1) * 10
-    )
-}
 
 function sleep(sec) {
     return new Promise((resolve) => setTimeout(resolve, sec * 1000))
