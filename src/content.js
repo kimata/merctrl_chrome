@@ -171,6 +171,15 @@ async function onsale_list_page_parse(send_response) {
 
     await wait_for_xpath('//mer-list[@data-testid="listed-item-list"]/mer-list-item')
 
+    while (true) {
+        const button_xpath = '//mer-button[contains(@class, "LoadMoreButton")]'
+        if (document.xpath(button_xpath).length == 0) {
+            break
+        }
+        document.xpath()[0].click()
+        await sleep(2)
+    }
+
     const article_count = document.xpath('//mer-list[@data-testid="listed-item-list"]/mer-list-item').length
     for (var i = 0; i < article_count; i++) {
         article_list.push(parse_onsale_article(i))
