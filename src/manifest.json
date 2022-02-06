@@ -1,7 +1,7 @@
 {
     "name": "Merhist Chrome Extension",
     "short_name": "Merhist",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "manifest_version": 3,
     "description": "Mercari の販売履歴を収集する拡張",
     "icons": {
