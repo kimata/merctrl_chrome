@@ -1,6 +1,6 @@
 {
-    "name": "Merhist Chrome Extension",
-    "short_name": "Merhist",
+    "name": "Merctrl Chrome Extension",
+    "short_name": "Merctrl",
     "version": "0.0.3",
     "manifest_version": 3,
     "description": "Mercari の販売履歴を収集する拡張",
